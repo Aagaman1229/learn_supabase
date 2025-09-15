@@ -6,7 +6,7 @@ function App() {
   // FIX 1: Corrected the typo "tsak" to "task".
   const [newTask, setNewTask] = useState({ task: "", description: "" });
   const [tasks, setTasks] = useState([]);
-  // lets use fetch to get the data from supabase
+  const [newDescription, setNewDescription] = useState(""); 
   const fetchTasks = async () => {
     const { data, error } = await supabase
         .from("tasks")
@@ -59,6 +59,23 @@ function App() {
     }
   };
 
+
+  const updateTask = async (id) => { 
+    const { data, error } = await supabase
+      .from("tasks")
+      .update({ description: newDescription })
+      .eq("id", id);
+    
+    if (error) {
+      console.error("Error updating task:", error);
+      return;
+    } else {
+      console.log("Task updated successfully:", data);
+      // Refresh the task list after update
+      fetchTasks();
+    }
+  };
+
   return (
     <div style={{ maxWidth: "600px", margin: "0 auto", padding: "1rem" }}>
       <h2>Task Manager CRUD</h2>
@@ -107,7 +124,13 @@ function App() {
             <h3>{task.task}</h3>
             <p>{task.description}</p>
             <div>
-              <button style={{ padding: "0.5rem 1rem", marginRight: "0.5rem" }}>
+              <textarea
+                placeholder="Update Task description"
+                onChange={(e) => {setNewDescription(e.target.value )}}/>
+              <button 
+              style={{ padding: "0.5rem 1rem", marginRight: "0.5rem" }}
+              onClick={() => updateTask(task.id, { task: newDescription })}
+              >
                 Edit
               </button>
               <button 
