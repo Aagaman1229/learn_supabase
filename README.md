@@ -30,7 +30,7 @@ A simple **Task Manager** built with **React** and **Supabase**, featuring user 
 ---
 
 ## 🛠️ Tech Stack
-- **Frontend**: React, Tailwind CSS (if used)  
+- **Frontend**: React 
 - **Backend**: Supabase (Auth, Database, Storage)  
 - **Auth**: Supabase JWT sessions  
 
@@ -40,5 +40,7 @@ A simple **Task Manager** built with **React** and **Supabase**, featuring user 
 
 1. **Clone the repo**
    ```bash
-   git clone https://github.com/your-username/task-manager-supabase.git
-   cd task-manager-supabase
+   git clone https://github.com/Aagaman1229/learn_supabase.git
+   cd react_and_supabase
+   cd task_manager_with_supabase
+   npm install
