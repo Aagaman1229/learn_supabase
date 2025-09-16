@@ -1,8 +1,7 @@
-import "./App.css";
 
 import { useEffect, useState } from "react";
-import { supabase } from "./supabase-client";
-function App() {
+import { supabase } from "../supabase-client";
+function TaskManagement({session}) {
   // FIX 1: Corrected the typo "tsak" to "task".
   const [newTask, setNewTask] = useState({ task: "", description: "" });
   const [tasks, setTasks] = useState([]);
@@ -31,7 +30,7 @@ function App() {
     e.preventDefault();
 
     // FIX 2: Ensure the object keys match the state.
-    const { data, error } = await supabase.from("tasks").insert(newTask).single();
+    const { data, error } = await supabase.from("tasks").insert({...newTask, email: session.user.email}).single();
 
     if (error) {
       console.error("Error inserting data:", error);
@@ -146,4 +145,4 @@ function App() {
   );
 }
 
-export default App;
+export default TaskManagement;
