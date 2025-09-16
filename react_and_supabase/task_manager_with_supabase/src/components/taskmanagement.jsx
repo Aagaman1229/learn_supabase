@@ -5,7 +5,8 @@ function TaskManagement({session}) {
   // FIX 1: Corrected the typo "tsak" to "task".
   const [newTask, setNewTask] = useState({ task: "", description: "" });
   const [tasks, setTasks] = useState([]);
-  const [newDescription, setNewDescription] = useState(""); 
+  const [newDescription, setNewDescription] = useState("");
+  const [taskImage, setTaskImage] = useState(null);
   const fetchTasks = async () => {
     const { data, error } = await supabase
         .from("tasks")
@@ -26,11 +27,25 @@ function TaskManagement({session}) {
     console.log(tasks);
   }, []);
 
+  const UploadImage = async (file) => {
+    const filePath = `${Date.now()}_${file.name}`;
+    const { data, error } = await supabase.storage
+      .from("tasks_images") // replace with your bucket name
+      .upload(filePath, file);
+    const imageUrl = supabase
+      .storage
+      .from('tasks_images')
+      .getPublicUrl(filePath);
+    return imageUrl.data.publicUrl;
+  }
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // FIX 2: Ensure the object keys match the state.
-    const { data, error } = await supabase.from("tasks").insert({...newTask, email: session.user.email}).single();
+    // before we add new task to db, we need to upload image to bucket
+     let image_url = null;
+     if( taskImage ){
+      image_url = await UploadImage(taskImage);
+     }
+    const { data, error } = await supabase.from("tasks").insert({...newTask, email: session.user.email,image_url:image_url}).single();
 
     if (error) {
       console.error("Error inserting data:", error);
@@ -57,6 +72,12 @@ function TaskManagement({session}) {
       fetchTasks();
     }
   };
+  
+  const handleFileChange = async (event) => {
+    if(event.target.files && event.target.files.length > 0) {
+      setTaskImage(event.target.files[0]);
+    }
+  }
 
 
   const updateTask = async (id) => { 
@@ -101,6 +122,7 @@ function TaskManagement({session}) {
           value={newTask.description}
           style={{ width: "100%", marginBottom: "0.5rem", padding: "0.5rem" }}
         />
+        <input type="file" accept="image/*" onChange={handleFileChange}/>
         {/* The button's type is "submit", so it automatically triggers the form's onSubmit event */}
         <button type="submit" style={{ padding: "0.5rem 1rem" }}>
           Add Task
@@ -114,14 +136,15 @@ function TaskManagement({session}) {
           key={key}
           style={{
             border: "1px solid #ccc",
-            borderRadius: "4px",
-            padding: "1rem",
-            marginBottom: "0.5rem",
+            borderRadius: "25px",
+            padding: "0",
+            marginBottom: "0px",
           }}
         >
           <div>
             <h3>{task.task}</h3>
             <p>{task.description}</p>
+            <img src={task.image_url} alt="Task" style={{maxWidth: '200px'}}/>
             <div>
               <textarea
                 placeholder="Update Task description"
